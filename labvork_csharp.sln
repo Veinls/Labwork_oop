@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "labvork_1_csharp", "labvork_1_csharp\labvork_1_csharp.csproj", "{70708234-B9A8-453C-BBF6-20247E598782}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "labvork_1_tests_csharp", "labvork_1_tests_csharp\labvork_1_tests_csharp.csproj", "{609DA0E6-DD71-4412-B705-EC2738BD6916}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{70708234-B9A8-453C-BBF6-20247E598782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70708234-B9A8-453C-BBF6-20247E598782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70708234-B9A8-453C-BBF6-20247E598782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70708234-B9A8-453C-BBF6-20247E598782}.Release|Any CPU.Build.0 = Release|Any CPU
+		{609DA0E6-DD71-4412-B705-EC2738BD6916}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{609DA0E6-DD71-4412-B705-EC2738BD6916}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{609DA0E6-DD71-4412-B705-EC2738BD6916}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{609DA0E6-DD71-4412-B705-EC2738BD6916}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
