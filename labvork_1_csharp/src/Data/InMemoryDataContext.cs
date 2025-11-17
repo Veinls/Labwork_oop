@@ -5,7 +5,8 @@ namespace labvork_1_csharp.Data
     // Паттерн Singleton (Одиночка)
     public sealed class InMemoryDataContext
     {
-        private static readonly Lazy<InMemoryDataContext> _instance = new Lazy<InMemoryDataContext>(() => new InMemoryDataContext());
+        private static readonly Lazy<InMemoryDataContext> _instance = new Lazy<InMemoryDataContext>(() 
+            => new InMemoryDataContext());
         public List<Course> Courses { get; set; } = new List<Course>();
         public List<Teacher> Teachers { get; set; } = new List<Teacher>();
         public List<Student> Students { get; set; } = new List<Student>();
