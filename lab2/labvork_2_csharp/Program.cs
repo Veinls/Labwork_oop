@@ -77,12 +77,28 @@ namespace labvork_2_csharp
             Console.WriteLine("-----------------");
             inventory.DisplayInventory();
 
+            Console.WriteLine("\nРАБОТА СО СТАКИРОВАНИЕМ");
+            Console.WriteLine("-----------------------");
+            Console.WriteLine($"Зелье здоровья стакается по: {healthPotion.StackAmount}");
+            Console.WriteLine($"Оружие стакается по: {steelSword.StackAmount}");
+            Console.WriteLine($"Броня стакается по: {leatherArmor.StackAmount}");
+
             Console.WriteLine("\nУДАЛЕНИЕ ПРЕДМЕТОВ");
             Console.WriteLine("------------------");
             
             inventory.RemoveItem("меч_стальной");
             
             inventory.RemoveItems("Зелье здоровья", 1);
+
+            Console.WriteLine("\nУДАЛЕНИЕ ПО ОБЪЕКТУ И ИНДЕКСУ");
+            Console.WriteLine("------------------------------");
+            var itemToRemove = inventory.GetItemAt(0);
+            if (itemToRemove != null)
+            {
+                inventory.RemoveItem(itemToRemove);
+            }
+            
+            inventory.RemoveItemAt(1);
 
             Console.WriteLine("\nИНВЕНТАРЬ ПОСЛЕ УДАЛЕНИЯ");
             Console.WriteLine("-----------------------");
@@ -102,6 +118,13 @@ namespace labvork_2_csharp
             Console.WriteLine("-----------------------");
             inventoryService.DisplayEnhancementInfo("топор_боевой");
             inventoryService.DisplayEnhancementInfo("доспех_кожаный");
+
+            Console.WriteLine("\nФИЛЬТРАЦИЯ ПО ТИПАМ ПРЕДМЕТОВ");
+            Console.WriteLine("-----------------------------");
+            inventoryService.DisplayItemsByType<Weapon>();
+            inventoryService.DisplayItemsByType<Potion>();
+            inventoryService.DisplayItemsByType<Armor>();
+            inventoryService.DisplayItemsByType<QuestItem>();
 
             Console.WriteLine("\nПОИСК И ИСПОЛЬЗОВАНИЕ ПРЕДМЕТОВ");
             Console.WriteLine("--------------------------------");
@@ -138,6 +161,20 @@ namespace labvork_2_csharp
                 .AsSword(20).Build();
             inventory.AddItem(newSword);
 
+            Console.WriteLine("\nСОЗДАНИЕ КВЕСТОВОГО ПРЕДМЕТА");
+            Console.WriteLine("-----------------------------");
+            var questItem = new QuestItem("свиток_древний", "Древний свиток", "quest_123", false, 3);
+            inventory.AddItem(questItem);
+            Console.WriteLine($"Добавлен квестовый предмет: {questItem.GetInfo()}");
+
+            Console.WriteLine("\nУЛУЧШАЕМЫЕ ПРЕДМЕТЫ");
+            Console.WriteLine("-------------------");
+            inventoryService.DisplayAllEnhanceableItems();
+
+            Console.WriteLine("\nПОПЫТКА УЛУЧШИТЬ КВЕСТОВЫЙ ПРЕДМЕТ");
+            Console.WriteLine("-----------------------------------");
+            inventoryService.EnhanceItem("свиток_древний");
+
             Console.WriteLine("\nФИНАЛЬНЫЙ ИНВЕНТАРЬ");
             Console.WriteLine("-------------------");
             inventory.DisplayInventory();
@@ -154,6 +191,17 @@ namespace labvork_2_csharp
             Console.WriteLine("\nФИНАЛЬНЫЙ СТАТУС");
             Console.WriteLine("-----------------");
             inventoryService.DisplayInventoryStatus();
+
+            Console.WriteLine("\nРАБОТА С КОНКРЕТНЫМИ СЛОТАМИ");
+            Console.WriteLine("-----------------------------");
+            for (int i = 0; i < inventory.MaxCapacity; i++)
+            {
+                var item = inventory.GetItemAt(i);
+                if (item != null)
+                {
+                    Console.WriteLine($"Слот [{i}]: {item.Name}");
+                }
+            }
 
             Console.WriteLine("\nУСЕ");
             Console.WriteLine("===========================");
