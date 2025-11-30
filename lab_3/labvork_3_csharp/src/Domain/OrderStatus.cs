@@ -1,6 +1,8 @@
 namespace labvork_3_csharp.Domain;
 
-public class OrderStatus
-{
-    
+public enum OrderStatus 
+{ 
+    Preparing, 
+    InDelivery, 
+    Completed 
 }
