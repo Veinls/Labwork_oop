@@ -2,7 +2,6 @@
 using labvork_3_csharp.OrderCreation;
 using labvork_3_csharp.Pricing;
 using labvork_3_csharp.Repositories;
-using labvork_3_csharp.Services;
 using labvork_3_csharp.OrderState;
 using labvork_3_csharp.OrderEnhancements;
 
@@ -98,31 +97,79 @@ public class UnitTest1
     }
 
     [Fact]
-    public void SpecialRequestDecorator_ShouldAddSpecialItem()
+    public void SpecialRequestDecorator_ShouldCalculateAdditionalCost()
     {
         var customer = new Customer("Test", "+79990000000");
         var order = new Order(customer);
         order.AddItem(new MenuItem("1", "Пицца", 12.99m), 1);
 
-        var decorator = new SpecialRequestDecorator(order, "дополнительный соус");
+        var adapter = new OrderAdapter(order);
+        var decorator = new SpecialRequestDecorator(adapter, "дополнительный соус");
 
-        Assert.Contains(order.Items, item => item.MenuItem.Name == "Особая услуга");
-        Assert.Equal(14.49m, order.Total);
+        Assert.Equal(14.49m, decorator.Total); 
+        Assert.Equal("Special", decorator.DeliveryType);
     }
 
     [Fact]
-    public void ExpressDeliveryDecorator_WithValidOrder_ShouldAddExpressItems()
+    public void SpecialRequestDecorator_ShouldNotModifyOriginalOrder()
+    {
+        var customer = new Customer("Test", "+79990000000");
+        var order = new Order(customer);
+        order.AddItem(new MenuItem("1", "Пицца", 12.99m), 1);
+        
+        var originalTotal = order.Total;
+        var adapter = new OrderAdapter(order);
+        var decorator = new SpecialRequestDecorator(adapter, "дополнительный соус");
+
+        Assert.Equal(originalTotal, order.Total);
+        Assert.Equal("Standard", order.DeliveryType);
+        
+        Assert.Equal(originalTotal + 1.50m, decorator.Total);
+    }
+
+    [Fact]
+    public void ExpressDeliveryDecorator_WithValidOrder_ShouldCalculateDeliveryCost()
     {
         var customer = new Customer("Test", "+79990000000");
         var order = new Order(customer);
         order.AddItem(new MenuItem("1", "Пицца", 25.00m), 1);
 
-        var decorator = new ExpressDeliveryDecorator(order);
+        var adapter = new OrderAdapter(order);
+        var decorator = new ExpressDeliveryDecorator(adapter);
 
-        Assert.Contains(order.Items, item => item.MenuItem.Name == "Экспресс-доставка");
-        Assert.Contains(order.Items, item => item.MenuItem.Name == "Бесплатный напиток");
-        Assert.Equal("Express", order.DeliveryType);
-        Assert.True(order.Total > 25.00m);
+        Assert.True(decorator.Total > 25.00m);
+        Assert.Equal("Express", decorator.DeliveryType);
+    }
+
+    [Fact]
+    public void ExpressDeliveryDecorator_WithSmallOrder_ShouldNotBeAvailable()
+    {
+        var customer = new Customer("Test", "+79990000000");
+        var order = new Order(customer);
+        order.AddItem(new MenuItem("5", "Кофе", 4.50m), 1);
+
+        var adapter = new OrderAdapter(order);
+        var decorator = new ExpressDeliveryDecorator(adapter);
+
+        Assert.Equal("Standard", decorator.DeliveryType);
+        Assert.Equal(4.50m, decorator.Total);
+    }
+
+    [Fact]
+    public void DecoratorChain_ShouldWorkCorrectly()
+    {
+        var customer = new Customer("Test", "+79990000000");
+        var order = new Order(customer);
+        order.AddItem(new MenuItem("1", "Пицца", 25.00m), 1);
+
+        var adapter = new OrderAdapter(order);
+        
+        IDecoratableOrder decorated = adapter;
+        decorated = new SpecialRequestDecorator(decorated, "дополнительный соус");
+        decorated = new ExpressDeliveryDecorator(decorated);
+
+        Assert.True(decorated.Total > 25.00m + 1.50m); 
+        Assert.Equal("Express", decorated.DeliveryType);
     }
 
     [Fact]
