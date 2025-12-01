@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("labvork_3_csharp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7d3352d80da8ba21f612d2cbc6250f419118b637")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bc716ea9fe2ec78666ab8def6668ffeec8bf34ab")]
 [assembly: System.Reflection.AssemblyProductAttribute("labvork_3_csharp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("labvork_3_csharp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

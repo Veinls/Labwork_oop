@@ -18,8 +18,11 @@ class Program
         var menuRepo = new MenuRepository();
         var orderRepo = new OrderRepository();
         var notificationService = new NotificationService();
+        var standardPricing = new StandardPricingStrategy();
 
-        DemonstrateOrderCreation(menuRepo, orderRepo, notificationService);
+        var orderService = new OrderService(orderRepo, standardPricing, notificationService);
+
+        DemonstrateOrderCreation(menuRepo, orderService);
         DemonstrateOrderProcessing(menuRepo, orderRepo);
         DemonstrateSpecialOrders(menuRepo, orderRepo);
         DemonstratePricingStrategies(menuRepo, orderRepo);
@@ -30,7 +33,7 @@ class Program
         Console.WriteLine("========================");
     }
 
-    static void DemonstrateOrderCreation(IMenuRepository menuRepo, IOrderRepository orderRepo, INotificationService notificationService)
+    static void DemonstrateOrderCreation(IMenuRepository menuRepo, IOrderService orderService)
     {
         Console.WriteLine("1. СОЗДАНИЕ ЗАКАЗОВ");
         Console.WriteLine("-------------------");
@@ -45,27 +48,22 @@ class Program
         var sushi = GetMenuItemSafe(menuRepo, "2", "Суши");
         var coffee = GetMenuItemSafe(menuRepo, "5", "Кофе");
 
-        if (pizza == null || coffee == null || sushi == null)
-        {
-            Console.WriteLine("Ошибка: не удалось найти необходимые товары в меню");
-            return;
-        }
+        if (pizza == null || coffee == null || sushi == null) return;
 
         var items1 = new List<MenuItem> { pizza, coffee };
-        var items2 = new List<MenuItem> { sushi, sushi, coffee }; 
+        var items2 = new List<MenuItem> { sushi, sushi, coffee };
 
         Console.WriteLine("ЗАКАЗ 1: Стандартная доставка");
-        var standardFactory = new StandardOrderFactory(standardDelivery);
-        var standardOrder = standardFactory.CreateOrder(customer1, items1);
-        notificationService.NotifyOrderCreated(standardOrder);
-        orderRepo.Save(standardOrder);
+    
+        var standardOrder = orderService.CreateOrder(customer1, items1);
+        standardOrder.DeliveryType = "Standard";
         Console.WriteLine($"Итоговая стоимость: {standardOrder.Total:C}");
 
         Console.WriteLine("ЗАКАЗ 2: Экспресс доставка");
+    
         var expressFactory = new ExpressOrderFactory(expressDelivery);
         var expressOrder = expressFactory.CreateOrder(customer2, items2);
-        notificationService.NotifyOrderCreated(expressOrder);
-        orderRepo.Save(expressOrder);
+    
         Console.WriteLine($"Итоговая стоимость: {expressOrder.Total:C}");
         Console.WriteLine();
     }
@@ -118,7 +116,7 @@ class Program
         Console.WriteLine("----------------------------");
 
         var customer = new Customer("Мария", "+79995554433");
-        
+    
         var pizza = GetMenuItemSafe(menuRepo, "1", "Пицца");
         var sushi = GetMenuItemSafe(menuRepo, "2", "Суши");
         var coffee = GetMenuItemSafe(menuRepo, "5", "Кофе");
@@ -135,13 +133,19 @@ class Program
         items.ForEach(item => order.AddItem(item, 1));
         orderRepo.Save(order);
 
-        var specialOrder = new SpecialRequestDecorator(order, "Без лука, добавить соус");
-        specialOrder.DisplayEnhancedOrder();
+        Console.WriteLine("Оригинальный заказ:");
+        order.DisplayEnhancedOrder(); 
+    
+        Console.WriteLine("\nЗаказ с особыми пожеланиями:");
+        var adapter = new OrderAdapter(order);
+        var specialDecorator = new SpecialRequestDecorator(adapter, "Без лука, добавить соус");
+        specialDecorator.DisplayEnhancedOrder();
 
         var expressStrategy = new ExpressDeliveryStrategy();
         try
         {
             var deliveryCost = expressStrategy.CalculateDeliveryCost(order);
+            Console.WriteLine($"\nПроверка экспресс-доставки:");
             Console.WriteLine($"Стоимость экспресс-доставки: {deliveryCost:C}");
             Console.WriteLine("Заказ подходит для экспресс-доставки");
         }
@@ -152,7 +156,7 @@ class Program
         Console.WriteLine();
     }
 
-        static void DemonstratePricingStrategies(IMenuRepository menuRepo, IOrderRepository orderRepo)
+    static void DemonstratePricingStrategies(IMenuRepository menuRepo, IOrderRepository orderRepo)
     {
         Console.WriteLine("4. СТРАТЕГИИ ЦЕНООБРАЗОВАНИЯ");
         Console.WriteLine("----------------------------");
@@ -202,84 +206,65 @@ class Program
         Console.WriteLine($"\nЭкономия со скидкой: {difference:C}");
         Console.WriteLine();
     }
-
     
     static void DemonstrateDecorators(IMenuRepository menuRepo, IOrderRepository orderRepo)
     {
         Console.WriteLine("5. ДЕКОРАТОРЫ");
-        Console.WriteLine("--------------");
+        Console.WriteLine("-------------");
 
         var customer = new Customer("Алексей", "+79991112233");
         var pizza = GetMenuItemSafe(menuRepo, "1", "Пицца");
         var coffee = GetMenuItemSafe(menuRepo, "5", "Кофе");
 
-        if (pizza == null || coffee == null)
-        {
-            Console.WriteLine("Ошибка: не удалось найти необходимые товары в меню");
-            return;
-        }
+        if (pizza == null || coffee == null) return;
 
-        var items = new List<MenuItem> { pizza, coffee };
-
-        Console.WriteLine("1. Базовый заказ (без декораторов):");
+        Console.WriteLine("\n1. Базовый заказ:");
         var baseOrder = new Order(customer);
-        items.ForEach(item => baseOrder.AddItem(item, 1));
-        DisplayOrderDetailed(baseOrder);
+        baseOrder.AddItem(pizza, 1);
+        baseOrder.AddItem(coffee, 1);
+        var baseAdapter = new OrderAdapter(baseOrder);
+        baseAdapter.DisplayEnhancedOrder();
         orderRepo.Save(baseOrder);
-        Console.WriteLine();
 
-        Console.WriteLine("2. Заказ с особыми пожеланиями:");
+        Console.WriteLine("\n2. Заказ с особыми пожеланиями:");
         var specialOrder = new Order(customer);
-        items.ForEach(item => specialOrder.AddItem(item, 1));
-        var specialDecorator = new SpecialRequestDecorator(specialOrder, "дополнительный соус и премиум упаковка");
+        specialOrder.AddItem(pizza, 1);
+        specialOrder.AddItem(coffee, 1);
+        
+        var specialAdapter = new OrderAdapter(specialOrder);
+        var specialDecorator = new SpecialRequestDecorator(specialAdapter, "дополнительный соус");
         specialDecorator.DisplayEnhancedOrder();
         orderRepo.Save(specialOrder);
-        Console.WriteLine();
 
-        Console.WriteLine("3. Заказ с экспресс доставкой:");
+        Console.WriteLine("\n3. Заказ с экспресс-доставкой:");
         var expressOrder = new Order(customer);
-        items.ForEach(item => expressOrder.AddItem(item, 1));
-        var expressDecorator = new ExpressDeliveryDecorator(expressOrder);
-        expressDecorator.DisplayEnhancedOrder(); 
+        expressOrder.AddItem(pizza, 2); 
+        
+        var expressAdapter = new OrderAdapter(expressOrder);
+        var expressDecorator = new ExpressDeliveryDecorator(expressAdapter);
+        expressDecorator.DisplayEnhancedOrder();
         orderRepo.Save(expressOrder);
-        Console.WriteLine();
-        
-        Console.WriteLine("4. Маленький заказ с экспресс-доставкой:");
-        var smallOrder = new Order(new Customer("Тест", "+79990000000"));
-        var coffeeOnly = GetMenuItemSafe(menuRepo, "5", "Кофе");
-        if (coffeeOnly != null)
-        {
-            smallOrder.AddItem(coffeeOnly, 1);
-            var smallExpressDecorator = new ExpressDeliveryDecorator(smallOrder);
-            smallExpressDecorator.DisplayEnhancedOrder();
-            orderRepo.Save(smallOrder);
-        }
-        
-        Console.WriteLine();
-        
-        Console.WriteLine("ИТОГОВОЕ СРАВНЕНИЕ СТОИМОСТЕЙ:");
-        Console.WriteLine($"• Базовый заказ: {baseOrder.Total:C}");
-        Console.WriteLine($"• С особыми пожеланиями: {specialOrder.Total:C}");
-        Console.WriteLine($"• С экспресс-доставкой: {expressOrder.Total:C}");
-        
-        if (smallOrder.Items.Any())
-        {
-            Console.WriteLine($"• Маленький заказ: {smallOrder.Total:C}");
-        }
-    }
 
-    static void DisplayOrderDetailed(Order order)
-    {
-        Console.WriteLine($"Заказ {order.Id} | Тип: {order.DeliveryType}");
-        Console.WriteLine("Состав заказа:");
-        foreach (var item in order.Items)
-        {
-            var priceInfo = item.Price == 0 ? "БЕСПЛАТНО" : $"{item.Price:C}";
-            Console.WriteLine($"  {item.MenuItem.Name} x{item.Quantity} - {priceInfo}");
-        }
-        Console.WriteLine($"Итого: {order.Total:C}");
-    }
+        Console.WriteLine("\n4. Комбинированный заказ (цепочка декораторов):");
+        var combinedOrder = new Order(customer);
+        combinedOrder.AddItem(pizza, 2);
+        combinedOrder.AddItem(coffee, 1);
 
+        var combinedAdapter = new OrderAdapter(combinedOrder);
+
+        IDecoratableOrder decorated = combinedAdapter;
+        decorated = new SpecialRequestDecorator(decorated, "подарочная упаковка");
+        decorated = new ExpressDeliveryDecorator(decorated);
+
+        decorated.DisplayEnhancedOrder();
+        orderRepo.Save(combinedOrder);
+
+        Console.WriteLine("\nСРАВНЕНИЕ СТОИМОСТЕЙ:");
+        Console.WriteLine($"• Базовый: {baseOrder.Total:C}");
+        Console.WriteLine($"• С пожеланиями: {specialDecorator.Total:C} (+{specialDecorator.Total - baseOrder.Total:C})");
+        Console.WriteLine($"• С экспресс-доставкой: {expressDecorator.Total:C}");
+        Console.WriteLine($"• Комбинированный: {decorated.Total:C}");
+    }
     
     static void DemonstrateCustomerOrders(IOrderRepository orderRepo)
     {
@@ -303,6 +288,7 @@ class Program
         }
         Console.WriteLine();
     }
+    
     private static MenuItem? GetMenuItemSafe(IMenuRepository menuRepo, string id, string itemName)
     {
         var item = menuRepo.GetById(id);

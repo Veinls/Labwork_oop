@@ -3,17 +3,14 @@ using labvork_3_csharp.Pricing;
 
 namespace labvork_3_csharp.OrderEnhancements;
 
-public class ExpressDeliveryDecorator : IOrderDecorator
+public class ExpressDeliveryDecorator : BaseOrderDecorator
 {
-    private readonly Order _order;
     private readonly decimal _expressDeliveryCost;
     private readonly bool _isExpressAvailable;
-
-    public ExpressDeliveryDecorator(Order order)
+    
+    public ExpressDeliveryDecorator(IDecoratableOrder order) : base(order)
     {
-        _order = order;
         (_isExpressAvailable, _expressDeliveryCost) = CalculateExpressCost();
-        ApplyExpressFeatures();
     }
     
     private (bool isAvailable, decimal cost) CalculateExpressCost()
@@ -21,7 +18,14 @@ public class ExpressDeliveryDecorator : IOrderDecorator
         try
         {
             var expressStrategy = new ExpressDeliveryStrategy();
-            var deliveryCost = expressStrategy.CalculateDeliveryCost(_order);
+            
+            var tempOrder = new Order(_decoratedOrder.Customer);
+            foreach (var item in _decoratedOrder.Items)
+            {
+                tempOrder.AddItem(item.MenuItem, item.Quantity);
+            }
+            
+            var deliveryCost = expressStrategy.CalculateDeliveryCost(tempOrder);
             return (true, deliveryCost);
         }
         catch (InvalidOperationException)
@@ -30,34 +34,43 @@ public class ExpressDeliveryDecorator : IOrderDecorator
         }
     }
     
-    private void ApplyExpressFeatures()
+    public override decimal Total => base.Total + (_isExpressAvailable ? _expressDeliveryCost : 0);
+    
+    public override string DeliveryType => _isExpressAvailable ? "Express" : "Standard";
+    
+    public override void DisplayEnhancedOrder()
     {
         if (_isExpressAvailable)
         {
-            _order.AddItem(new MenuItem("express_delivery", "Экспресс-доставка", _expressDeliveryCost), 1);
-            _order.AddItem(new MenuItem("bonus", "Бесплатный напиток", 0), 1);
-            _order.DeliveryType = "Express";
+            Console.WriteLine("========================================");
+            Console.WriteLine("          ЭКСПРЕСС ДОСТАВКА");
+            Console.WriteLine("========================================");
+            Console.WriteLine($"Стоимость экспресс-доставки: {_expressDeliveryCost:C}");
+            Console.WriteLine($"Бонус: Бесплатный напиток");
+            Console.WriteLine($"Время доставки: 30-40 минут");
+            Console.WriteLine();
         }
         else
         {
-            _order.DeliveryType = "Standard";
+            Console.WriteLine("========================================");
+            Console.WriteLine("     Экспресс-доставка недоступна");
+            Console.WriteLine("========================================");
+            Console.WriteLine();
         }
-    }
-    
-    public void DisplayEnhancedOrder()
-    {
-        Console.WriteLine($"Экспресс-заказ {_order.Id}");
-        Console.WriteLine("Состав заказа:");
-        foreach (var item in _order.Items)
+        
+        base.DisplayEnhancedOrder();
+        
+        if (_isExpressAvailable)
         {
-            var priceInfo = item.Price == 0 ? "БЕСПЛАТНО" : $"{item.Price:C}";
-            Console.WriteLine($"  {item.MenuItem.Name} x{item.Quantity} - {priceInfo}");
+            Console.WriteLine();
+            Console.WriteLine($"Общая сумма с доставкой: {Total:C}");
+            Console.WriteLine("========================================");
         }
-        Console.WriteLine($"Итого: {_order.Total:C}");
     }
     
-    public string GetOrderInfo()
+    public override string GetOrderInfo()
     {
-        return $"Заказ {_order.Id} | Сумма: {_order.Total:C} | Тип: Express";
+        var type = _isExpressAvailable ? "Express" : "Standard";
+        return $"Заказ {Id} | Сумма: {Total:C} | Тип: {type}";
     }
 }
