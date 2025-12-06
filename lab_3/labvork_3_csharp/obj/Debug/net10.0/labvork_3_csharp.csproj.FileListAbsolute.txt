@@ -1,0 +1,15 @@
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/labvork_3_csharp.GeneratedMSBuildEditorConfig.editorconfig
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/labvork_3_csharp.AssemblyInfoInputs.cache
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/labvork_3_csharp.AssemblyInfo.cs
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/labvork_3_csharp.csproj.CoreCompileInputs.cache
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/labvork_3_csharp.sourcelink.json
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/bin/Debug/net10.0/labvork_3_csharp
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/bin/Debug/net10.0/labvork_3_csharp.deps.json
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/bin/Debug/net10.0/labvork_3_csharp.runtimeconfig.json
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/bin/Debug/net10.0/labvork_3_csharp.dll
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/bin/Debug/net10.0/labvork_3_csharp.pdb
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/labvork_3_csharp.dll
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/refint/labvork_3_csharp.dll
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/labvork_3_csharp.pdb
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/labvork_3_csharp.genruntimeconfig.cache
+/Users/lisau/C#/labvork_csharp/lab_3/labvork_3_csharp/obj/Debug/net10.0/ref/labvork_3_csharp.dll
